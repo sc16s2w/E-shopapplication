@@ -16,7 +16,7 @@ public class CategoryService {
      * @param pid
      * @return
      */
-    public List<Category> queryCategoriesByPid(Long pid) {
+    public List<Category> queryCategoriesByPid(String pid) {
         Category record = new Category();
         record.setParentId(pid);
         return this.categoryMapper.select(record);

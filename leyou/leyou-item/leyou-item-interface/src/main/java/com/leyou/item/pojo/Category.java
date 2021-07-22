@@ -9,17 +9,17 @@ import javax.persistence.Table;
 public class Category {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private long id;
+    private String id;
     private String name;
-    private long parentId;
+    private String parentId;
     private Boolean isParent;
     private Integer sort;
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -31,11 +31,11 @@ public class Category {
         this.name = name;
     }
 
-    public long getParentId() {
+    public String getParentId() {
         return parentId;
     }
 
-    public void setParentId(long parentId) {
+    public void setParentId(String parentId) {
         this.parentId = parentId;
     }
 

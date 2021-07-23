@@ -55,4 +55,18 @@ public class BrandController {
 
     }
 
+    @PutMapping
+    public ResponseEntity<Void> updateBrand(Brand brand, @RequestParam("cids") List<Long> cids) {
+        this.brandService.UpdateBrand(brand,cids);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+
+    }
+
+    @DeleteMapping("delete/{bid}")
+    public ResponseEntity<Void> deleteBrand(@PathVariable("bid") Long bid){
+        this.brandService.deleteBrand(bid);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+
 }

@@ -61,15 +61,43 @@ public class BrandService {
      * @param brand
      * @param cids
      */
-    //自动回滚
+    //自动会滚
     @Transactional
     public void saveBrand(Brand brand, List<Long> cids) {
         //先新增brand表，再新增中间表
         Boolean flag = this.brandMapper.insertSelective(brand) == 1;
-        if(flag == true){
+        if(flag){
             cids.forEach(cid -> {
                 this.brandMapper.insertCategoryAndBrand(cid, brand.getId());
             });
+        }
+    }
+
+
+    /**
+     * 更新一个品牌
+     * @param brand
+     * @param cids
+     */
+    @Transactional
+    public void UpdateBrand(Brand brand, List<Long> cids) {
+        Boolean flag = this.brandMapper.updateByPrimaryKey(brand) == 1;
+        if(flag){
+            cids.forEach(cid -> {
+                this.brandMapper.updateCategoryAndBrand(cid, brand.getId());
+            });
+        }
+    }
+
+    /**
+     * 删除一个品牌
+     * @param bid
+     */
+    @Transactional
+    public void deleteBrand(Long bid) {
+        Boolean flag = this.brandMapper.deleteByPrimaryKey(bid)==1;
+        if(flag){
+            this.brandMapper.deleteCategoryAndBrand(bid);
         }
     }
 }

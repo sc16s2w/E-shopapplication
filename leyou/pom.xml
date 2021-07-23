@@ -16,6 +16,7 @@
         <module>leyou-item/leyou-item-service</module>
         <module>leyou-item/leyou-item-interface</module>
         <module>leyou-common</module>
+        <module>leyou-upload</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

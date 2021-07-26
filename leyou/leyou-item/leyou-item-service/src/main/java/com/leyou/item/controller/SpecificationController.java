@@ -59,8 +59,13 @@ public class SpecificationController {
      * @return
      */
     @GetMapping("params")
-    public ResponseEntity<List<SpecParam>> QuertSpecParamByQid(@RequestParam("gid") Long gid){
-        List<SpecParam> result = this.specificationService.QuerySpecParamByQid(gid);
+    public ResponseEntity<List<SpecParam>> QuertSpecParamByQid(
+            @RequestParam(value = "gid",required = false) Long gid,
+            @RequestParam(value = "cid",required = false) Long cid,
+            @RequestParam(value = "generic",required = false) Boolean generic,
+            @RequestParam(value = "searching",required = false) Boolean searching
+            ){
+        List<SpecParam> result = this.specificationService.QuerySpecParamByQid(gid,cid,generic,searching);
         if(result == null || result.size()<1){
             return ResponseEntity.notFound().build();
         }
@@ -95,4 +100,5 @@ public class SpecificationController {
         this.specificationService.DeleteSpecParamById(id);
         return ResponseEntity.noContent().build();
     }
+
 }

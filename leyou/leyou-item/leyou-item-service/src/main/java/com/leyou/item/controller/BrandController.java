@@ -68,5 +68,20 @@ public class BrandController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
+    /**
+     * 根据cid查询brand信息
+     * @param cid
+     * @return
+     */
+    @GetMapping("cid/{cid}")
+    public ResponseEntity<List<Brand>> QueryBrandByCid(@PathVariable("cid") Long cid){
+        List<Brand> result = this.brandService.queryBrandsByCid(cid);
+        if(CollectionUtils.isEmpty(result)){
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.ok(result);
+
+    }
+
 
 }

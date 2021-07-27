@@ -50,4 +50,19 @@ public class CategoryController {
         }
         return ResponseEntity.ok(result);
     }
+
+
+    /**
+     * 根据id查询名字
+     * @param ids
+     * @return
+     */
+    @GetMapping
+    public ResponseEntity<List<String>> queryNamesByIds(@RequestParam("ids")List<Long> ids){
+        List<String> result = this.categoryService.queryNamesByIds(ids);
+        if(CollectionUtils.isEmpty(result)){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
+    }
 }

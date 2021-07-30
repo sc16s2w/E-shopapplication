@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
+@RequestMapping("spec")
 public interface SpecificationApi {
     @GetMapping("groups/{cid}")
     public List<SpecGroup> QuerySpecGroupByCid(@PathVariable("cid") Long cid);

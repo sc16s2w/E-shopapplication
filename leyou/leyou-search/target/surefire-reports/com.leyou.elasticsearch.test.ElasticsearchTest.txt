@@ -1,0 +1,10 @@
+-------------------------------------------------------------------------------
+Test set: com.leyou.elasticsearch.test.ElasticsearchTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 1.947 s <<< FAILURE! - in com.leyou.elasticsearch.test.ElasticsearchTest
+test(com.leyou.elasticsearch.test.ElasticsearchTest)  Time elapsed: 0.001 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to introspect Class [com.leyou.search.search.SearchService] from ClassLoader [jdk.internal.loader.ClassLoaders$AppClassLoader@277050dc]
+Caused by: java.lang.NoClassDefFoundError: com/leyou/item/api/CategoryApi
+Caused by: java.lang.ClassNotFoundException: com.leyou.item.api.CategoryApi
+

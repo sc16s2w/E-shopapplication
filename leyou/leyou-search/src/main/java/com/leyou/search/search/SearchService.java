@@ -1,11 +1,117 @@
 package com.leyou.search.search;
 
-import com.leyou.item.pojo.Spu;
-import com.leyou.search.pojo.Goods;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.leyou.common.pojo.PageResult;
+import com.leyou.item.pojo.*;
+import com.leyou.search.client.BrandClient;
+import com.leyou.search.client.CategoryClient;
+import com.leyou.search.client.GoodsClient;
+import com.leyou.search.client.SpecificationClient;
+import com.leyou.search.pojo.Goods;
+import com.leyou.search.pojo.SearchRequest;
+import com.leyou.search.pojo.SearchResult;
+import com.leyou.search.repository.GoodsRepository;
+import org.apache.commons.lang.math.NumberUtils;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.io.IOException;
+import java.util.*;
+
+@Service
 public class SearchService {
-    public Goods buildGoods(Spu spu){
+    @Autowired
+    private CategoryClient categoryClient;
+
+    @Autowired
+    private BrandClient brandClient;
+
+    @Autowired
+    private GoodsClient goodsClient;
+
+    @Autowired
+    private SpecificationClient specificationClient;
+
+    @Autowired
+    private GoodsRepository goodsRepository;
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    public Goods buildGoods(Spu spu) throws IOException {
         Goods goods = new Goods();
+        //根据分类id查询分类名称
+        List<String> names = this.categoryClient.queryNamesByIds(Arrays.asList(spu.getCid1(),
+                spu.getCid2(), spu.getCid3()));
+        //根据品牌id查询品牌
+        Brand brand = this.brandClient.QueryBrandById(spu.getBrandId());
+        //根据spuid查询所有sku
+        List<Sku> skus = this.goodsClient.QuerySkuByid(spu.getId());
+        List<Long> prices = new ArrayList<>();
+        //收集sku的必要字段信息
+        List<Map<String, Object>> skuMapList = new ArrayList<>();
+        for(Sku sku:skus){
+            prices.add(sku.getPrice());
+            Map<String, Object> skuMap = new HashMap<>();
+            skuMap.put("id", sku.getId());
+            skuMap.put("title", sku.getTitle());
+            skuMap.put("price", sku.getPrice());
+            if(sku.getImages()!=null){
+                String[] store = sku.getImages().split(",");
+                skuMap.put("image",store[0]);
+            }
+            else{
+                skuMap.put("image","");
+            }
+            skuMapList.add(skuMap);
+
+        }
+        List<SpecParam> params = this.specificationClient.QuertSpecParamByQid(null, spu.getCid3(), null, true);
+        // 查询spuDetail。获取规格参数值
+        SpuDetail spuDetail = this.goodsClient.QueryGoodsById(spu.getId());
+        // 获取通用的规格参数
+        Map<Long, Object> genericSpecMap = MAPPER.readValue(spuDetail.getGenericSpec(), new TypeReference<Map<Long, Object>>() {
+        });
+        // 获取特殊的规格参数
+        Map<Long, List<Object>> specialSpecMap = MAPPER.readValue(spuDetail.getSpecialSpec(), new TypeReference<Map<Long, List<Object>>>() {
+        });
+        // 定义map接收{规格参数名，规格参数值}
+        Map<String, Object> paramMap = new HashMap<>();
+        params.forEach(param -> {
+            // 判断是否通用规格参数
+            if (param.getGeneric()) {
+                // 获取通用规格参数值
+                String value = genericSpecMap.get(param.getId()).toString();
+                // 判断是否是数值类型
+                if (param.getNumeric()){
+                    // 如果是数值的话，判断该数值落在那个区间
+                    value = chooseSegment(value, param);
+                }
+                // 把参数名和值放入结果集中
+                paramMap.put(param.getName(), value);
+            } else {
+                paramMap.put(param.getName(), specialSpecMap.get(param.getId().toString()));
+            }
+        });
+
         goods.setId(spu.getId());
         goods.setCid1(spu.getCid1());
         goods.setCid2(spu.getCid2());
@@ -14,10 +120,146 @@ public class SearchService {
         goods.setCreateTime(spu.getCreateTime());
         goods.setSubTitle(spu.getSubTitle());
         //拼接all字段
-        goods.setAll(spu.getTitle()+" "+null+" "+ null);
-        goods.setPrice(null);
-        goods.setSkus(null);
-        goods.setSpecs(null);
+        goods.setAll(spu.getTitle()+" "+String.join(" ",names)+" "+ brand.getName());
+        goods.setPrice(prices);
+        goods.setSkus(MAPPER.writeValueAsString(skuMapList));
+        goods.setSpecs(paramMap );
         return goods;
+    }
+
+    private String chooseSegment(String value, SpecParam p) {
+        double val = NumberUtils.toDouble(value);
+        String result = "其它";
+        // 保存数值段
+        for (String segment : p.getSegments().split(",")) {
+            String[] segs = segment.split("-");
+            // 获取数值范围
+            double begin = NumberUtils.toDouble(segs[0]);
+            double end = Double.MAX_VALUE;
+            if(segs.length == 2){
+                end = NumberUtils.toDouble(segs[1]);
+            }
+            // 判断是否在范围内
+            if(val >= begin && val < end){
+                if(segs.length == 1){
+                    result = segs[0] + p.getUnit() + "以上";
+                }else if(begin == 0){
+                    result = segs[1] + p.getUnit() + "以下";
+                }else{
+                    result = segment + p.getUnit();
+                }
+                break;
+            }
+        }
+        return result;
+    }
+
+    public SearchResult search(SearchRequest searchRequest) {
+        if(searchRequest.getKey()==null){
+            return null;
+        }
+        //自定义查询构建
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        //添加查询条件
+        MatchQueryBuilder basicQuery = QueryBuilders.matchQuery("all",searchRequest.getKey()).operator(Operator.AND);
+        queryBuilder.withQuery(basicQuery);
+        //只需要部分字段，并不是需要全部字段，在结果集上进行过滤
+        queryBuilder.withSourceFilter(new FetchSourceFilter(
+                new String[]{"id","skus","subTitle"}, null));
+        String sortBy = searchRequest.getSortBy();
+        Boolean desc = searchRequest.getDescending();
+        if(sortBy != null&&sortBy.length()!=0){
+            queryBuilder.withSort(SortBuilders.fieldSort(sortBy).order(desc? SortOrder.DESC:SortOrder.ASC));
+        }
+        String categoryAggName = "categories";
+        String brandAggName = "brands";
+        queryBuilder.addAggregation(AggregationBuilders.terms(categoryAggName).field("cid3"));
+        queryBuilder.addAggregation(AggregationBuilders.terms(brandAggName).field("brandId"));
+        //执行查询， 获取结果集
+        Page<Goods> goodsPage = (AggregatedPage<Goods>)this.goodsRepository.search(queryBuilder.build());
+        List<Map<String,Object>> categories = getCategoryAggResult(((AggregatedPage<Goods>) goodsPage).getAggregation(categoryAggName));
+        List<Brand> brands = getBrandAggResult(((AggregatedPage<Goods>) goodsPage).getAggregation(brandAggName));
+        int size = SearchRequest.getDefaultSize();
+        Long total = goodsPage.getTotalElements();
+        int totalPage = (total.intValue()+size-1)/size;
+        //判断是否是一个分类，只有一个分类才能做规格参数聚合
+        List<Map<String,Object>> specs = null;
+        if(categories.size()==1){
+            specs = getSpecsAggResult((Long)categories.get(0).get("id"),basicQuery);
+        }
+        return new SearchResult(total,totalPage,goodsPage.getContent(),categories,brands,specs);
+
+    }
+
+    /**
+     * 解析分类的聚合集
+     * @param aggregation
+     * @return
+     */
+    private List<Map<String,Object>> getCategoryAggResult(Aggregation aggregation){
+        LongTerms terms = (LongTerms) aggregation;
+        List<LongTerms.Bucket> store = terms.getBuckets();
+        Map<String,Object> result = new HashMap<>();
+        for(LongTerms.Bucket bucket:store){
+            Long id = bucket.getKeyAsNumber().longValue();
+            List<String> names = this.categoryClient.queryNamesByIds(Arrays.asList(id));
+            result.put("id",id);
+            result.put("name",names);
+        }
+        List<Map<String,Object>> final_result = new ArrayList<>();
+        final_result.add(result);
+        return final_result;
+    }
+
+    /**
+     * 解析品牌的聚合集
+     * @param aggregation
+     * @return
+     */
+    private List<Brand> getBrandAggResult(Aggregation aggregation){
+        LongTerms terms = (LongTerms)aggregation;
+        List<LongTerms.Bucket> store = terms.getBuckets();
+        List<Brand> brands = new ArrayList<>();
+        for(LongTerms.Bucket bucket:store){
+            long l = bucket.getKeyAsNumber().longValue();
+            Brand brand = this.brandClient.QueryBrandById(l);
+            brands.add(brand);
+        }
+        return brands;
+    }
+
+    /**
+     * 根据查询条件聚合规格参数
+     * @param id
+     * @param basicQuery
+     * @return
+     */
+    private List<Map<String,Object>> getSpecsAggResult(Long id, QueryBuilder basicQuery){
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        queryBuilder.withQuery(basicQuery);
+        //查询要聚合的规格参数
+        List<SpecParam> params = this.specificationClient.QuertSpecParamByQid(null,null,null,true);
+        //添加规格参数的聚合
+        for (SpecParam specParam:params){
+            queryBuilder.addAggregation(AggregationBuilders.terms(specParam.getName()).field("specs."+specParam.getName()+".keyword"));
+        }
+        //添加结果集过滤
+        queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{},null));
+        //执行聚合查询
+        AggregatedPage<Goods> goodsPage = (AggregatedPage<Goods>)this.goodsRepository.search(queryBuilder.build());
+        //解析聚合结果集
+        Map<String,Aggregation> aggregationMap = goodsPage.getAggregations().asMap();
+        List<Map<String,Object>> result = new ArrayList<>();
+        for (Map.Entry<String, Aggregation> entry : aggregationMap.entrySet()) {
+            //初始化map格式，规格参数名，聚合的是规格参数值
+            Map<String,Object> map = new HashMap<>();
+            List<Object> options = new ArrayList<>();
+            map.put("k",entry.getKey());
+            StringTerms terms = (StringTerms) entry.getValue();
+            terms.getBuckets().forEach(bucket -> options.add(bucket.getKeyAsString()));
+            map.put("options", options);
+            result.add(map);
+        }
+        return result;
     }
 }

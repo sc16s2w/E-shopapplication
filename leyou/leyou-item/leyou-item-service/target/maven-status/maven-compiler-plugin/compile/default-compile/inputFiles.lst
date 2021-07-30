@@ -1,0 +1,17 @@
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/controller/CategoryController.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/mapper/CategoryMapper.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/mapper/StockMapper.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/mapper/SpecParamMapper.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/service/GoodService.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/service/CategoryService.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/controller/BrandController.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/mapper/SpecGroupMapper.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/mapper/SkuMapper.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/LeyouItemServiceApplication.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/service/BrandService.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/mapper/SpuDetailMapper.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/controller/GoodController.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/mapper/BrandMapper.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/mapper/SpuMapper.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/controller/SpecificationController.java
+/Users/wangsiwei/Desktop/E-shopApplication/leyou/leyou-item/leyou-item-service/src/main/java/com/leyou/item/service/SpecificationService.java

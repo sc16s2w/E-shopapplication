@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "spring.data.jackson",
+      "type": "java.lang.String",
+      "description": "Description for spring.data.jackson."
+  }
+] }

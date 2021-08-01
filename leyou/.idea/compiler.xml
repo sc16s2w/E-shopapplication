@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="leyou-registry" />
         <module name="leyou-search" />
+        <module name="leyou-goods-web" />
         <module name="leyou-item-interface" />
         <module name="leyou-upload" />
         <module name="leyou-common" />
@@ -20,6 +21,7 @@
       <module name="leyou" target="11" />
       <module name="leyou-common" target="11" />
       <module name="leyou-gateway" target="11" />
+      <module name="leyou-goods-web" target="11" />
       <module name="leyou-item" target="11" />
       <module name="leyou-item-interface" target="11" />
       <module name="leyou-item-service" target="11" />
@@ -32,6 +34,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="leyou-common" options="-parameters" />
       <module name="leyou-gateway" options="-parameters" />
+      <module name="leyou-goods-web" options="-parameters" />
       <module name="leyou-item-interface" options="-parameters" />
       <module name="leyou-item-service" options="-parameters" />
       <module name="leyou-registry" options="-parameters" />

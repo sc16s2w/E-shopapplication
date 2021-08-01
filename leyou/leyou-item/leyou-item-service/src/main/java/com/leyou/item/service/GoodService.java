@@ -216,4 +216,13 @@ public class GoodService {
         spuDetail.setSpuId(id);
         this.spuDetailMapper.delete(spuDetail);
     }
+
+    /**
+     * 根据id查询spu对象
+     * @param id
+     * @return
+     */
+    public Spu querySpuByid(Long id) {
+        return this.spuMapper.selectByPrimaryKey(id);
+    }
 }

@@ -1,5 +1,6 @@
 package com.leyou.elasticsearch.test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.leyou.LeyouSearchService;
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.extra.SpuExtra;
@@ -12,11 +13,16 @@ import com.leyou.search.repository.GoodsRepository;
 import com.leyou.search.search.SearchService;
 import com.leyou.search.pojo.Goods;
 import com.leyou.search.pojo.Item;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
@@ -68,4 +74,38 @@ public class ElasticsearchTest {
             page++;
         } while (rows == 100);
     }
+    @Test
+    public void ReLoadData(){
+        elasticsearchTemplate.createIndex(Goods.class);
+        elasticsearchTemplate.putMapping(Goods.class);
+        Integer page = 1;
+        Integer rows = 100;
+        do {
+            PageResult<SpuExtra> result = this.goodsClient.QuerySpuByPage("", null, page, rows);
+            List<SpuExtra> items = result.getItems();
+            List<Goods> goods = items.stream().map(spuExtra -> {
+                try {
+                    return searchService.buildGoods(spuExtra);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }).collect(Collectors.toList());
+            goodsRepository.saveAll(goods);
+            rows = items.size();
+            page++;
+        }while (rows == 100);
+    }
+
+    @Test
+    public void testAgg(){
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        // 不查询任何结果
+        queryBuilder.withQuery(QueryBuilders.termQuery("cid3",76)).withSourceFilter(new FetchSourceFilter(new String[]{""},null)).withPageable(PageRequest.of(0,1));
+        Page<Goods> goodsPage = this.goodsRepository.search(queryBuilder.build());
+        goodsPage.forEach(System.out::println);
+    }
+
 }

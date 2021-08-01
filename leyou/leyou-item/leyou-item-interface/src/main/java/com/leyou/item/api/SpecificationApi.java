@@ -58,4 +58,7 @@ public interface SpecificationApi {
      */
     @DeleteMapping("param/{id}")
     public Void DeleteSpecParamById(@PathVariable("id") Long id);
+
+    @GetMapping("group/param/{cid}")
+    public List<SpecGroup> queryGroupsWithParam(@PathVariable("cid")Long cid);
 }

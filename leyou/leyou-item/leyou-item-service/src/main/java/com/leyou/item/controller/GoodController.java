@@ -3,6 +3,7 @@ package com.leyou.item.controller;
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.extra.SpuExtra;
 import com.leyou.item.pojo.Sku;
+import com.leyou.item.pojo.Spu;
 import com.leyou.item.pojo.SpuDetail;
 import com.leyou.item.service.GoodService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,5 +115,19 @@ public class GoodController {
     public ResponseEntity<Void> DeleteGoodsById(@PathVariable("id") Long id){
         this.goodService.DeleteGoodsByid(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 根据id查询spu对象
+     * @param id
+     * @return
+     */
+    @GetMapping("{id}")
+    public ResponseEntity<Spu> querySpuByid(@PathVariable("id") Long id){
+        Spu spu = this.goodService.querySpuByid(id);
+        if(spu == null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(spu);
     }
 }

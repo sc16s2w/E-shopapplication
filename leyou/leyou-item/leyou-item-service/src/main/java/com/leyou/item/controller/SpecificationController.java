@@ -101,4 +101,19 @@ public class SpecificationController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * 查询规格组下面的参数
+     * @param cid
+     * @return
+     */
+    @GetMapping("group/param/{cid}")
+    public ResponseEntity<List<SpecGroup>> queryGroupsWithParam(@PathVariable("cid")Long cid) {
+        List<SpecGroup> specGroups = this.specificationService.queryGroupsWithParam(cid);
+        if (specGroups == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(specGroups);
+    }
+
+
 }

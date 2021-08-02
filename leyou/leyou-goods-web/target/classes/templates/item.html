@@ -141,6 +141,27 @@
 						</div>
 					</div>
 				</div>
+<!--				<div class="zoom">-->
+<!--					&lt;!&ndash;默认第一个预览&ndash;&gt;-->
+<!--					<div id="preview" class="spec-preview">-->
+<!--      <span class="jqzoom">-->
+<!--         <img :jqimg="images[0]" :src="images[0]" width="400px" height="400px"/>-->
+<!--      </span>-->
+<!--					</div>-->
+<!--					&lt;!&ndash;下方的缩略图&ndash;&gt;-->
+<!--					<div class="spec-scroll">-->
+<!--						<a class="prev">&lt;</a>-->
+<!--						&lt;!&ndash;左右按钮&ndash;&gt;-->
+<!--						<div class="items">-->
+<!--							<ul>-->
+<!--								<li v-for="(image, i) in images" :key="i">-->
+<!--									<img :src="image" :bimg="image" onmousemove="preview(this)" />-->
+<!--								</li>-->
+<!--							</ul>-->
+<!--						</div>-->
+<!--						<a class="next">&gt;</a>-->
+<!--					</div>-->
+<!--				</div>-->
 				<div class="fr itemInfo-wrap">
 					<div class="sku-name">
 						<h4>{{sku.title}}</h4>
@@ -432,62 +453,32 @@
 						<div class="tab-content tab-wraped">
 							<div id="one" class="tab-pane active">
 								<ul class="goods-intro-list unstyled" style="list-style: none;">
-									<li>分辨率：1920*1080(FHD)</li>
-									<li>后置摄像头：1200万像素</li>
-									<li>前置摄像头：500万像素</li>
-									<li>核 数：其他</li>
-									<li>频 率：以官网信息为准</li>
-									<li>品牌： Apple</li>
-									<li>商品名称：APPLEiPhone 6s Plus</li>
-									<li>商品编号：1861098</li>
-									<li>商品毛重：0.51kg</li>
-									<li>商品产地：中国大陆</li>
-									<li>热点：指纹识别，Apple Pay，金属机身，拍照神器</li>
-									<li>系统：苹果（IOS）</li>
-									<li>像素：1000-1600万</li>
-									<li>机身内存：64GB</li>
+									<li v-for="(param,i) in param">{{i}}:{{param}}</li>
 								</ul>
 								<!--商品详情-->
 								<div class="intro-detail">
-									<img src="/img/_/intro01.png" />
-									<img src="/img/_/intro02.png" />
-									<img src="/img/_/intro03.png" />
+									<p th:utext ="${spuDetail.description}"></p>
 								</div>
 							</div>
 							<div id="two" class="tab-pane">
 								<div class="Ptable">
-    <div class="Ptable-item">
-        <h3>主体</h3>
-        <dl>
-            <dt>品牌</dt><dd>华为（HUAWEI）</dd>
-            <dt>型号</dt><dd>CLT-AL00</dd>
-            <dt>入网型号</dt><dd>CLT-AL00</dd>
-            <dt>上市年份</dt><dd>2018年</dd>
-            <dt>上市月份</dt><dd>4月</dd>
-        </dl>
-    </div>
-    <div class="Ptable-item">
-        <h3>基本信息</h3>
-        <dl>
-            <dt>机身颜色</dt><dd>宝石蓝</dd>
-            <dt>机身长度（mm）</dt><dd>155.0 </dd>
-            <dt>机身宽度（mm）</dt><dd>73.9 </dd>
-            <dt>机身厚度（mm）</dt><dd>7.8</dd>
-            <dt>机身重量（g）</dt><dd>约180g（含电池）</dd>
-            <dt>输入方式</dt><dd>触控</dd>
-            <dt>运营商标志或内容</dt><dd>无</dd>
-            <dt>机身材质分类</dt><dd>玻璃后盖</dd>
-        </dl>
-    </div>
-</div>
-<div class="package-list">
-    <h3>包装清单</h3>
-    <p>手机X1、快速指南X1、华为SuperCharge 充电器X1、三包凭证X1、Type-C 数字耳机X1、Type-C 数据线X1、取卡针X1、TPU保护壳X1、USB Type-C转3.5mm耳机转接线X1（备注：最终以实物为准）</p>
-</div>
-
+									<div class="Ptable-item" v-for="group in groups" :key="group.name">
+										<h3>{{group.name}}</h3>
+										<dl>
+											<div v-for="p in group.params">
+												<dt>{{p.name}}</dt><dd>{{p.v + (p.unit || '')}}</dd>
+											</div>
+										</dl>
+									</div>
+								</div>
+								<div class="package-list">
+									<h3>包装清单</h3>
+										<p th:text="${spuDetail.packingList}"></p>
+								</div>
 							</div>
 							<div id="three" class="tab-pane">
 								<p>售后保障</p>
+								<p th:text="${spuDetail.afterService}"></p>
 							</div>
 							<div id="four" class="tab-pane">
 								<p>商品评价</p>
@@ -636,10 +627,14 @@
 	const paramMap = /*[[${paramMap}]]*/ {};
 	// 特有规格参数集合
 	const specialSpec = JSON.parse(/*[[${spuDetail.specialSpec}]]*/ "");
+	const genericSpec = JSON.parse(/*[[${spuDetail.genericSpec}]]*/ "");
 	const indexes = {};
+	let groups = /*[[${groups}]]*/ [];
 	Object.keys(paramMap).forEach(key=>{
 		indexes[key] = 0;
 	})
+	const param = {};
+	Object.keys(paramMap).forEach(k => Object.keys(specialSpec).includes(k) ? param[paramMap[k]] = specialSpec[k][indexes[k]] : param[paramMap[k]] = genericSpec[k]);
 </script>
 <script>
     var itemVm = new Vue({
@@ -648,8 +643,10 @@
         	ly,
         	skus,
 			paramMap,
-			specialSpec,
+			specialSpec, // sku特有规格属性模板
+			genericSpec, // 全局规格属性
 			indexes,
+			param,
         },
 		computed: {
 			sku(){
@@ -658,6 +655,20 @@
 			},
 			images(){
 				return this.sku.images ? this.sku.images.split(",") : [''];
+			},
+			groups() {
+				groups.forEach(group => {
+					group.params.forEach(param => {
+						if (param.generic) {
+							// 通用属性，去spu的genericSpec中获取
+							param.v = this.genericSpec[param.id] || '其它';
+						} else {
+							// 特有属性值，去SKU中获取
+							param.v = JSON.parse(this.sku.ownSpec)[param.id]
+						}
+					});
+				});
+				return groups;
 			}
 		},
         components:{

@@ -43,7 +43,7 @@ public class GoodsService {
         //查询skus
         List<Sku> skus = this.goodsClient.QuerySkuByid(spuID);
         //查询规格参数组
-        List<SpecGroup> groups = this.specificationClient.QuerySpecGroupByCid(spu.getCid3());
+        List<SpecGroup> groups = this.specificationClient.queryGroupsWithParam(spu.getCid3());
         //查询特殊的规格参数
         List<SpecParam> params = this.specificationClient.QuertSpecParamByQid(null,spu.getCid3(),false,null);
         Map<Long, String> paramMap = new HashMap<>();

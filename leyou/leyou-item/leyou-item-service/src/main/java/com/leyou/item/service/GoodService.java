@@ -9,6 +9,8 @@ import com.leyou.item.pojo.Sku;
 import com.leyou.item.pojo.Spu;
 import com.leyou.item.pojo.SpuDetail;
 import com.leyou.item.pojo.Stock;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 public class GoodService {
@@ -41,6 +44,9 @@ public class GoodService {
 
     @Autowired
     private StockMapper stockMapper;
+
+    @Autowired
+    private AmqpTemplate amqpTemplate;
 
     /**
      * 根据条件分页查询商品信息
@@ -117,6 +123,12 @@ public class GoodService {
             stock.setStock(sku.getStock());
             this.stockMapper.insertSelective(stock);
         }
+//        try{
+//            this.amqpTemplate.convertAndSend("item.insert",spuExtra.getId());
+//        }catch (AmqpException e){
+//            e.printStackTrace();
+//        }
+        sendMessage(spuExtra.getId(),"insert");
     }
 
     /**
@@ -179,6 +191,7 @@ public class GoodService {
         spuExtra.setSaleable(null);
         this.spuMapper.updateByPrimaryKeySelective(spuExtra);
         this.spuDetailMapper.updateByPrimaryKeySelective(spuExtra.getSpuDetail());
+        sendMessage(spuExtra.getId(),"update");
     }
 
     /**
@@ -224,5 +237,19 @@ public class GoodService {
      */
     public Spu querySpuByid(Long id) {
         return this.spuMapper.selectByPrimaryKey(id);
+    }
+
+    /**
+     * 发送消息到rabbitmq里面
+     * @param id
+     * @param type
+     */
+    private void sendMessage(Long id, String type){
+        // 发送消息
+        try {
+            this.amqpTemplate.convertAndSend("item." + type, id);
+        } catch (AmqpException e) {
+            e.printStackTrace();
+        }
     }
 }

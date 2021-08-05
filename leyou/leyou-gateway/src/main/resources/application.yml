@@ -14,4 +14,20 @@ zuul:
     item-service: /item/** # 商品微服务的映射路径
     search-service: /search/** #搜索微服务的印射路径
     user-service: /user/** #用户微服务的印射路径
+    auth-service: /auth/** # 授权中心微服务
+  add-host-header: true
+  sensitive-headers: null
+leyou:
+  jwt:
+    pubKeyPath: /Users/wangsiwei/Desktop/E-shopApplication/RSA/rsa.pub
+    expire: 30
+    cookieName: LY_TOKEN
+  filter:
+    allowPaths:
+      - /api/auth
+      - /api/search
+      - /api/user/register
+      - /api/user/check
+      - /api/user/code
+      - /api/item
 

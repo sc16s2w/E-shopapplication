@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: com.leyou.auth.test.JwtTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.826 s <<< FAILURE! - in com.leyou.auth.test.JwtTest
+testParseToken on testParseToken(com.leyou.auth.test.JwtTest)(com.leyou.auth.test.JwtTest)  Time elapsed: 0.221 s  <<< FAILURE!
+io.jsonwebtoken.SignatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+	at com.leyou.auth.test.JwtTest.testParseToken(JwtTest.java:45)
+

@@ -22,6 +22,7 @@
         <module>leyou-user</module>
         <module>leyou-sms-service</module>
         <module>leyou-auth</module>
+        <module>leyou-cart</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

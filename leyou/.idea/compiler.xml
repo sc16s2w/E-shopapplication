@@ -10,6 +10,7 @@
         <module name="leyou-search" />
         <module name="leyou-user-interface" />
         <module name="leyou-item-interface" />
+        <module name="leyou-cart" />
         <module name="leyou-registry" />
         <module name="leyou-sms-service" />
         <module name="leyou-goods-web" />
@@ -27,6 +28,7 @@
       <module name="leyou-auth" target="11" />
       <module name="leyou-auth-common" target="11" />
       <module name="leyou-auth-service" target="11" />
+      <module name="leyou-cart" target="11" />
       <module name="leyou-common" target="11" />
       <module name="leyou-gateway" target="11" />
       <module name="leyou-goods-web" target="11" />
@@ -47,6 +49,7 @@
       <module name="leyou-auth" options="-parameters" />
       <module name="leyou-auth-common" options="-parameters" />
       <module name="leyou-auth-service" options="-parameters" />
+      <module name="leyou-cart" options="-parameters" />
       <module name="leyou-common" options="-parameters" />
       <module name="leyou-gateway" options="-parameters" />
       <module name="leyou-goods-web" options="-parameters" />

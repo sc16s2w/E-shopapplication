@@ -252,4 +252,8 @@ public class GoodService {
             e.printStackTrace();
         }
     }
+
+    public Sku querySkuById(Long id) {
+        return this.skuMapper.selectByPrimaryKey(id);
+    }
 }

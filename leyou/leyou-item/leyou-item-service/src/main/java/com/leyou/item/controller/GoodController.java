@@ -22,6 +22,15 @@ public class GoodController {
     @Autowired
     private GoodService goodService;
 
+
+    @GetMapping("sku/{id}")
+    public ResponseEntity<Sku> querySkuById(@PathVariable("id")Long id){
+        Sku sku = this.goodService.querySkuById(id);
+        if (sku == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(sku);
+    }
     /**
      * 根据条件分页查询商品信息
      * @param key
@@ -30,6 +39,9 @@ public class GoodController {
      * @param rows
      * @return
      */
+
+
+
     @GetMapping("spu/page")
     public ResponseEntity<PageResult<SpuExtra>> QuerySpuByPage(
             @RequestParam(value = "key",required = false) String key,

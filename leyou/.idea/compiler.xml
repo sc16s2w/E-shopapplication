@@ -7,6 +7,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="leyou-order" />
         <module name="leyou-search" />
         <module name="leyou-user-interface" />
         <module name="leyou-item-interface" />
@@ -35,6 +36,7 @@
       <module name="leyou-item" target="11" />
       <module name="leyou-item-interface" target="11" />
       <module name="leyou-item-service" target="11" />
+      <module name="leyou-order" target="11" />
       <module name="leyou-registry" target="11" />
       <module name="leyou-search" target="11" />
       <module name="leyou-sms-service" target="11" />
@@ -55,6 +57,7 @@
       <module name="leyou-goods-web" options="-parameters" />
       <module name="leyou-item-interface" options="-parameters" />
       <module name="leyou-item-service" options="-parameters" />
+      <module name="leyou-order" options="-parameters" />
       <module name="leyou-registry" options="-parameters" />
       <module name="leyou-search" options="-parameters" />
       <module name="leyou-sms-service" options="-parameters" />

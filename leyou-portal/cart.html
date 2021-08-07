@@ -51,9 +51,9 @@
                                         <div class="item-img"><img src="img/goods.png" width="80px" height="80px"/></div>
                                         <div class="item-msg">
 												<span style="line-height:70px ">
-													{{cart.title}}<br/>
+													{{cart.title}}</br>
                                                     <span v-for="(v,k) in cart.ownSpec" :key="k">
-                                                        {{v}}</br>
+                                                        {{v}}
                                                     </span>
 												</span>
                                         </div>
@@ -283,23 +283,48 @@
             }
         },
         methods: {
-            loadCarts() {
-                // 先判断登录状态
+            toOrderInfo() {
+                // 判断是否登录
                 ly.verify().then(() => {
                     // 已登录
-
+                    window.location.href = "/getOrderInfo.html"
                 }).catch(() => {
                     // 未登录
+                    window.location.href = "/login.html?returnUrl=" + window.location.href;
+                })
+            },
+            loadCarts() {
+                //1.先判断登录状态
+                ly.verify().then(res => {
+                    //2.已经登录
+                    leyou.http.get("/cart").then(({data}) => {
+                        this.carts = data;
+                        this.carts.forEach(s => {
+                            s.ownSpec = JSON.parse(s.ownSpec);
+                        });
+                        this.selected = this.carts;
+                        this.$refs.selectAllTop.checked = true;
+                        this.$refs.selectAllBottom.checked = true;
+
+                    }).catch(() => {
+                        console.log("查询失败")
+                    })
+
+                }).catch(() => {
+                    //3.未登陆
                     this.carts = ly.store.get("carts") || [];
-                    this.selected = this.carts;
                     this.carts.forEach(s => {
                         s.ownSpec = JSON.parse(s.ownSpec);
                     });
+                    this.selected = this.carts;
+                    this.$refs.selectAllTop.checked = true;
+                    this.$refs.selectAllBottom.checked = true;
                 })
             },
             incr(cart){
                 cart.num++;
                 ly.verify().then(() => {
+                    ly.http.put("/cart",{skuId:cart.skuId,num:cart.num});
                     // 已登录
 
                 }).catch(() => {
@@ -311,6 +336,7 @@
                 if(cart.num<=1) return;
                 cart.num--;
                 ly.verify().then(() => {
+                    ly.http.put("/cart",{skuId:cart.skuId,num:cart.num});
                     // 已登录
 
                 }).catch(() => {
@@ -319,8 +345,11 @@
                 });
             },
             deleteCart(i){
-                ly.verify().then(res=>{
+                ly.verify().then(()=>{
                     //已登陆购物车
+                    ly.http.delete("/cart/"+this.carts[i].skuId).then(()=>{
+                    this.carts.splice(i,1);
+                    })
                 }).catch(()=>{
                     this.carts.splice(i,1);
                     ly.store.set("carts",this.carts);
